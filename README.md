@@ -14,7 +14,7 @@
 
 ## 运行
 
-需要 [uv](https://docs.astral.sh/uv/)，Pillow 会在 `uv sync` 时自动装好。
+需要 [uv](https://docs.astral.sh/uv/)，Pillow 会在 `uv sync` 时自动装好。活动前先联网执行一次 `mise exec -- uv sync`，现场就可以完全离线运行。
 
 ```bash
 cd lug-newbie
