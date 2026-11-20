@@ -27,8 +27,6 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     screen = "welcome"
-    id_text = ""
-    id_error = ""
     placed_key = None
     last_size = None
     idle = 0.0
@@ -44,10 +42,8 @@ def main(argv: list[str] | None = None) -> int:
         term.clear()
 
     def to_welcome() -> None:
-        nonlocal screen, placed_key, idle, id_text, id_error
+        nonlocal screen, placed_key, idle
         screen = "welcome"
-        id_text = ""
-        id_error = ""
         placed_key = None
         idle = 0.0
         term.clear_image()
@@ -80,34 +76,9 @@ def main(argv: list[str] | None = None) -> int:
                 pass
 
             elif screen == "welcome":
-                if key in ("enter", "space"):
-                    screen = "id"
-                    placed_key = None
-                    term.clear_image()
-                    term.clear()
-                elif key == "esc":
-                    pass
-                elif key is not None and len(key) == 1:
-                    screen = "id"
-                    placed_key = None
-                    term.clear_image()
-                    term.clear()
-
-            elif screen == "id":
-                if key == "esc":
-                    to_welcome()
-                elif key == "backspace":
-                    id_text = id_text[:-1]
-                    id_error = ""
-                elif key == "enter":
-                    if session.begin(id_text):
-                        go("question")
-                    else:
-                        id_error = "学号需要是 8-15 位数字。"
-                elif key is not None and len(key) == 1 and key.isdigit():
-                    if len(id_text) < 15:
-                        id_text += key
-                        id_error = ""
+                if key in ("enter", "space") or (key is not None and len(key) == 1):
+                    session.begin()
+                    go("question")
 
             elif screen == "question":
                 if key == "esc":
@@ -130,22 +101,16 @@ def main(argv: list[str] | None = None) -> int:
             elif screen == "result":
                 if key in ("n", "N", "enter", "space"):
                     session = Session(random.randrange(1_000_000))
-                    id_text = ""
-                    id_error = ""
-                    go("id")
+                    go("welcome")
                 elif key in ("q", "Q", "esc"):
                     running = False
 
             # 空闲保护
-            if screen == "id" and idle > 90:
-                to_welcome()
-            elif screen == "result" and idle > 120:
+            if screen == "result" and idle > 120:
                 session = Session(random.randrange(1_000_000))
-                id_text = ""
-                id_error = ""
-                go("id")
+                go("welcome")
 
-            frame = ui.render(screen, session, id_text, id_error, now, w, h)
+            frame = ui.render(screen, session, now, w, h)
             term.write(frame.text)
             if frame.png is not None and frame.rect is not None:
                 if frame.art_key != placed_key:

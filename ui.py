@@ -1,4 +1,4 @@
-"""终端界面：欢迎、学号、三关、反馈与拍照结算。"""
+"""终端界面：欢迎、三关、反馈与拍照结算。"""
 
 from __future__ import annotations
 
@@ -145,31 +145,6 @@ class UI:
         key = ("welcome", w, h, self.protocol)
         return Frame(c.render(rect), png, rect, key, img)
 
-    # ---------- 学号 ----------
-
-    def _id(self, c: Canvas, w: int, h: int, text: str, error: str, now: float) -> Frame:
-        c.fill(0, 0, w, h, " ", INK, BG)
-        draw_stars(c, w, h, now, False)
-        self._header(c, w, "输入学号", "STEP 1 / 4", DIM)
-        cw = min(64, w - 10)
-        cx = (w - cw) // 2
-        cy = max(4, (h - 15) // 2)
-        c.box(cx, cy, cw, 15, BLUE, "玩家信息", BLUE2, PANEL, fill_inner=True)
-        c.put(cx + 3, cy + 2, "请把学号写在这里，结算时用于拍照核对。", DIM)
-        c.put(cx + 3, cy + 4, "学号", FAINT, PANEL)
-        shown = text or "__________"
-        c.put(cx + 9, cy + 4, shown, WHITE, PANEL, bold=True)
-        if int(now * 3) % 2 == 0:
-            c.put(cx + 9 + width(shown), cy + 4, "█", AMBER, PANEL, bold=True)
-        c.put(cx + 3, cy + 6, "8-15 位数字 · 不对接学校系统，仅作活动记录", FAINT)
-        if error:
-            c.put(cx + 3, cy + 8, error, RED, PANEL, bold=True)
-        c.put(cx + 3, cy + 10, "Enter 确认", GREEN, PANEL, bold=True)
-        c.put(cx + 16, cy + 10, "· Esc 返回", FAINT, PANEL)
-        c.put(cx + 3, cy + 12, "输入的数字不会上传网络。", FAINT, PANEL)
-        self._footer(c, w, h, "数字输入 · Backspace 删除", "Esc 返回 · Ctrl-C 退出")
-        return Frame(c.render())
-
     # ---------- 关卡 ----------
 
     def _terminal(self, c: Canvas, command: str, x: int, y: int, w: int, h: int,
@@ -267,24 +242,22 @@ class UI:
         rect, png, img = self._image(c, "assets/tux.png", tx, ty, tw, th,
                                      ("result", w, h, session.passed), "")
 
-        c.put(x + 3, y + 2, "学号", FAINT, PANEL)
-        c.put(x + 9, y + 2, session.player_id, WHITE, PANEL, bold=True)
-        c.put(x + 3, y + 4, "三关结果", DIM, PANEL)
+        c.put(x + 3, y + 2, "三关结果", DIM, PANEL)
         labels = ("系统识别", "命令行猜词", "发行版盲盒")
         for i in range(3):
-            yy = y + 5 + i
+            yy = y + 3 + i
             ok = session.results[i] == "pass"
             mark = "✓ 通过" if ok else "✗ 失败"
             c.put(x + 3, yy, f"第 {i + 1} 关", FAINT, PANEL)
             c.put(x + 12, yy, labels[i], INK, PANEL)
             c.put(x + 25, yy, mark, GREEN if ok else RED, PANEL, bold=True)
 
-        c.put(x + 3, y + 9, "通关", FAINT, PANEL)
-        c.put(x + 8, y + 9, f"{session.passed} / 3", AMBER2, PANEL, bold=True)
-        c.put(x + 3, y + 10, "可领取", FAINT, PANEL)
-        c.put(x + 10, y + 10, session.prize, WHITE, PANEL, bold=True)
-        c.put(x + 3, y + 12, "完成时间", FAINT, PANEL)
-        c.put(x + 12, y + 12, session.finished_text, INK, PANEL)
+        c.put(x + 3, y + 7, "通关", FAINT, PANEL)
+        c.put(x + 8, y + 7, f"{session.passed} / 3", AMBER2, PANEL, bold=True)
+        c.put(x + 3, y + 8, "可领取", FAINT, PANEL)
+        c.put(x + 10, y + 8, session.prize, WHITE, PANEL, bold=True)
+        c.put(x + 3, y + 10, "完成时间", FAINT, PANEL)
+        c.put(x + 12, y + 10, session.finished_text, INK, PANEL)
 
         msg = "请用手机拍下此页面，向工作人员展示后领取奖品"
         yy = y + ch - 4
@@ -307,8 +280,7 @@ class UI:
 
     # ---------- 入口 ----------
 
-    def render(self, screen: str, session: Session, id_text: str = "",
-               id_error: str = "", now: float | None = None,
+    def render(self, screen: str, session: Session, now: float | None = None,
                w: int = 100, h: int = 30) -> Frame:
         now = time.monotonic() if now is None else now
         c = Canvas(w, h)
@@ -316,8 +288,6 @@ class UI:
             return self._too_small(c, w, h)
         if screen == "welcome":
             return self._welcome(c, w, h, now)
-        if screen == "id":
-            return self._id(c, w, h, id_text, id_error, now)
         if screen in ("question", "feedback"):
             return self._question(c, session, w, h, now, screen == "feedback")
         return self._result(c, session, w, h, now)

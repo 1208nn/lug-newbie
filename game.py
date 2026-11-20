@@ -27,7 +27,6 @@ class Outcome:
 class Session:
     def __init__(self, seed: int | None = None):
         self.rng = random.Random(seed)
-        self.player_id = ""
         self.level = 0
         self.results: list[str | None] = [None, None, None]
         self.used: list[set[str]] = [set(), set(), set()]
@@ -38,16 +37,9 @@ class Session:
         self.finished_at: datetime | None = None
         self.state = "id"          # id / question / feedback / result
 
-    # ---------- 学号 ----------
+    # ---------- 开局 ----------
 
-    @staticmethod
-    def valid_id(text: str) -> bool:
-        return text.isdigit() and 8 <= len(text) <= 15
-
-    def begin(self, player_id: str) -> bool:
-        if not self.valid_id(player_id):
-            return False
-        self.player_id = player_id
+    def begin(self) -> None:
         self.level = 0
         self.results = [None, None, None]
         self.used = [set(), set(), set()]
@@ -55,7 +47,6 @@ class Session:
         self.finished_at = None
         self._new_question()
         self.state = "question"
-        return True
 
     # ---------- 题目 ----------
 
