@@ -35,7 +35,7 @@ class Session:
         self.attempts = 0          # 本关已用机会：0 / 1（换题不会重置）
         self.feedback: Outcome | None = None
         self.finished_at: datetime | None = None
-        self.state = "id"          # id / question / feedback / result
+        self.state = "ready"       # ready / question / feedback / result
 
     # ---------- 开局 ----------
 
